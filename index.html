@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a1a1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="ヒーロー科">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>ヒーロー科レポート（店舗）</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -129,7 +135,8 @@ textarea { resize: vertical; min-height: 100px; line-height: 1.7; }
       <button id="list-btn-store" class="btn-secondary" style="background:#1a1a1a;color:#fff;border-color:#1a1a1a;" onclick="switchListView('store')">店舗レポート</button>
       <button id="list-btn-training" class="btn-secondary" onclick="switchListView('training')">育成レポート</button>
     </div>
-    <div id="reports-list"><div class="empty-state">まだ記録がありません。</div></div>
+    <button class="btn-secondary" id="fetch-btn" onclick="fetchLatest()" style="width:100%;margin-bottom:1rem;">最新データを取得する</button>
+    <div id="reports-list"><div class="empty-state">「最新データを取得する」を押してください。</div></div>
   </div>
 
   <!-- 管理者タブ -->
@@ -263,6 +270,34 @@ function switchTab(tab) {
     el.classList.toggle('active', ['input','training','list','admin'][i] === tab);
   });
   if (tab === 'list') renderList();
+}
+
+function fetchLatest() {
+  const btn = document.getElementById('fetch-btn');
+  btn.textContent = '取得中...';
+  btn.disabled = true;
+
+  const type = currentListView === 'store' ? 'reports' : 'trainings';
+  fetch(GAS_URL + '?type=' + type)
+    .then(r => r.json())
+    .then(data => {
+      if (type === 'reports' && data.reports) {
+        reports = data.reports;
+        saveReports(reports);
+      }
+      if (type === 'trainings' && data.trainings) {
+        trainings = data.trainings;
+        saveTrainings(trainings);
+      }
+      renderList();
+      btn.textContent = '最新データを取得する';
+      btn.disabled = false;
+    })
+    .catch(() => {
+      alert('取得に失敗しました。通信状況を確認してください。');
+      btn.textContent = '最新データを取得する';
+      btn.disabled = false;
+    });
 }
 
 function switchListView(view) {
@@ -454,6 +489,13 @@ function removeTrainee(i) {
   if (!confirm('「' + trainees[i] + '」を削除しますか？')) return;
   trainees.splice(i, 1); saveTrainees(trainees); saveMaster();
   renderTraineeSelect(); renderTraineeManage();
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/hero-report/sw.js');
+  });
 }
 </script>
 </body>
