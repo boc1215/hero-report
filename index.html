@@ -212,6 +212,25 @@ document.getElementById('tr-date').value    = today();
 renderStoreSelect();
 renderTraineeSelect();
 
+// スプレッドシートからマスタを読み込む
+fetch(GAS_URL)
+  .then(r => r.json())
+  .then(data => {
+    if (data.stores && data.stores.length) {
+      stores = data.stores;
+      saveStores(stores);
+      renderStoreSelect();
+      renderStoreManage();
+    }
+    if (data.trainees && data.trainees.length) {
+      trainees = data.trainees;
+      saveTrainees(trainees);
+      renderTraineeSelect();
+      renderTraineeManage();
+    }
+  })
+  .catch(() => {});
+
 function renderStoreSelect() {
   const sel = document.getElementById('input-store');
   const cur = sel.value;
@@ -403,18 +422,22 @@ function renderTraineeManage() {
   `).join('') : '<div style="font-size:13px;color:#aaa;padding:8px 0;">まだ新人が登録されていません。</div>';
 }
 
+function saveMaster() {
+  sendToSheet({ type: 'updateMaster', stores: stores, trainees: trainees });
+}
+
 function addStore() {
   const input = document.getElementById('new-store-input');
   const name  = input.value.trim();
   if (!name) return;
   if (stores.includes(name)) { alert('同じ名前の店舗がすでにあります。'); return; }
-  stores.push(name); saveStores(stores); input.value = '';
+  stores.push(name); saveStores(stores); saveMaster(); input.value = '';
   renderStoreSelect(); renderStoreManage();
 }
 
 function removeStore(i) {
   if (!confirm('「' + stores[i] + '」を削除しますか？')) return;
-  stores.splice(i, 1); saveStores(stores);
+  stores.splice(i, 1); saveStores(stores); saveMaster();
   renderStoreSelect(); renderStoreManage();
 }
 
@@ -423,13 +446,13 @@ function addTrainee() {
   const name  = input.value.trim();
   if (!name) return;
   if (trainees.includes(name)) { alert('同じ名前がすでにあります。'); return; }
-  trainees.push(name); saveTrainees(trainees); input.value = '';
+  trainees.push(name); saveTrainees(trainees); saveMaster(); input.value = '';
   renderTraineeSelect(); renderTraineeManage();
 }
 
 function removeTrainee(i) {
   if (!confirm('「' + trainees[i] + '」を削除しますか？')) return;
-  trainees.splice(i, 1); saveTrainees(trainees);
+  trainees.splice(i, 1); saveTrainees(trainees); saveMaster();
   renderTraineeSelect(); renderTraineeManage();
 }
 </script>
