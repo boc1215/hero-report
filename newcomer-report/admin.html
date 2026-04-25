@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理者ページ — 新人レポート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface2: #f0ede8;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.15);
+    --text: #1a1a1a;
+    --text2: #666;
+    --text3: #999;
+    --accent: #1a1a1a;
+    --accent-light: #f0ede8;
+    --green: #2d7a45;
+    --green-bg: #e8f5ec;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-title { font-size: 14px; font-weight: 700; letter-spacing: 0.05em; }
+  .header-sub { font-size: 12px; color: var(--text3); }
+  .logout-btn {
+    font-size: 12px; color: var(--text3); cursor: pointer; padding: 6px 12px;
+    border: 1px solid var(--border2); border-radius: 20px; background: none;
+    font-family: inherit;
+  }
+  .logout-btn:hover { color: var(--text); border-color: var(--text); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ログイン */
+  .login-wrap {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 24px;
+  }
+  .login-card {
+    width: 100%; max-width: 360px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 32px;
+  }
+  .login-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .login-desc { font-size: 12px; color: var(--text3); margin-bottom: 28px; }
+  .field { margin-bottom: 16px; }
+  .field-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+  input[type=password], input[type=text], select, textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border2);
+    border-radius: var(--radius-sm); font-family: inherit; font-size: 14px;
+    background: var(--surface); color: var(--text); outline: none; transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--text); }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+  .btn {
+    width: 100%; padding: 11px; border: none; border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-outline {
+    background: transparent; color: var(--text); border: 1px solid var(--border2); margin-top: 8px;
+  }
+  .btn-outline:hover { border-color: var(--text); }
+  .btn-sm {
+    padding: 7px 14px; font-size: 12px; border-radius: var(--radius-sm);
+    border: none; font-family: inherit; font-weight: 700; cursor: pointer;
+  }
+  .btn-green { background: var(--green-bg); color: var(--green); }
+  .btn-green:hover { background: #d4edda; }
+
+  /* メインレイアウト */
+  .main-layout { display: flex; min-height: calc(100vh - 57px); }
+  .sidebar {
+    width: 220px; background: var(--surface); border-right: 1px solid var(--border);
+    padding: 20px 12px; flex-shrink: 0; position: sticky; top: 57px;
+    height: calc(100vh - 57px); overflow-y: auto;
+  }
+  .sidebar-label { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 0.1em; margin-bottom: 8px; padding: 0 8px; }
+  .staff-item {
+    padding: 8px 10px; border-radius: var(--radius-sm); cursor: pointer;
+    font-size: 13px; color: var(--text2); margin-bottom: 2px; display: flex;
+    justify-content: space-between; align-items: center;
+  }
+  .staff-item:hover { background: var(--surface2); color: var(--text); }
+  .staff-item.active { background: var(--accent); color: #fff; }
+  .staff-item.active .unread { background: #fff; color: var(--accent); }
+  .unread {
+    font-size: 10px; background: #ff5f5f; color: #fff;
+    padding: 1px 6px; border-radius: 20px; font-weight: 700;
+  }
+
+  .content { flex: 1; padding: 24px; max-width: 800px; }
+  .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .content-title { font-size: 18px; font-weight: 700; }
+  .content-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* フィルター */
+  .filter-row { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-chip {
+    padding: 5px 14px; border-radius: 20px; font-size: 12px; cursor: pointer;
+    border: 1px solid var(--border2); background: var(--surface); color: var(--text2);
+    font-family: inherit;
+  }
+  .filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* レポートカード */
+  .report-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 14px;
+  }
+  .report-card.has-fb { border-left: 3px solid var(--green); }
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .card-date { font-size: 13px; color: var(--text2); }
+  .card-no { font-size: 11px; color: var(--text3); }
+  .time-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .time-tag {
+    font-size: 11px; padding: 3px 9px; border-radius: 20px;
+    background: var(--surface2); color: var(--text2);
+  }
+  .section-row { margin-bottom: 10px; }
+  .section-key { font-size: 11px; font-weight: 700; color: var(--text3); margin-bottom: 3px; }
+  .section-val { font-size: 13px; color: var(--text); line-height: 1.65; }
+  .photos-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .report-photo {
+    width: 80px; height: 80px; object-fit: cover; border-radius: 6px;
+    border: 1px solid var(--border); cursor: pointer; transition: transform 0.15s;
+  }
+  .report-photo:hover { transform: scale(1.04); }
+
+  /* FBエリア */
+  .fb-area { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 14px; }
+  .fb-existing { background: var(--green-bg); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 10px; }
+  .fb-existing-label { font-size: 10px; font-weight: 700; color: var(--green); margin-bottom: 4px; }
+  .fb-existing-text { font-size: 13px; color: #1a3d2a; line-height: 1.6; }
+  .fb-input-wrap { display: flex; gap: 8px; align-items: flex-start; }
+  .fb-input-wrap textarea { flex: 1; min-height: 60px; font-size: 13px; }
+
+  /* 比較ビュー */
+  .compare-section { margin-bottom: 32px; }
+  .compare-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .compare-sub { font-size: 12px; color: var(--text3); margin-bottom: 14px; }
+  .compare-select-area { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .date-checkbox { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .date-checkbox input { cursor: pointer; }
+  .date-checkbox label { font-size: 13px; color: var(--text2); cursor: pointer; }
+  .compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .compare-col { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .compare-col-header { padding: 10px 12px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .compare-col-date { font-size: 12px; font-weight: 700; }
+  .compare-col-body { padding: 12px; }
+  .compare-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; margin-bottom: 8px; }
+  .compare-stat { font-size: 11px; color: var(--text2); margin-bottom: 3px; }
+  .stat-value { font-weight: 700; color: var(--text); }
+
+  /* 画像ライトボックス */
+  .lightbox {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+    z-index: 999; align-items: center; justify-content: center;
+  }
+  .lightbox.active { display: flex; }
+  .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+  .lightbox-close {
+    position: fixed; top: 20px; right: 20px; width: 36px; height: 36px;
+    background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 18px;
+    border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text3); font-size: 14px; }
+  .overlay {
+    display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.7);
+    z-index: 998; align-items: center; justify-content: center;
+  }
+  .overlay.active { display: flex; }
+  .spinner {
+    width: 36px; height: 36px; border: 3px solid var(--border2);
+    border-top-color: var(--text); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .tab-row { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .tab {
+    padding: 10px 18px; font-size: 13px; cursor: pointer;
+    color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -1px;
+    font-family: inherit;
+  }
+  .tab.active { color: var(--text); border-bottom-color: var(--text); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ログイン画面 -->
+<div id="screen-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-title">管理者ページ</div>
+      <div class="login-desc">新人レポート — フィードバック管理</div>
+      <div class="field">
+        <div class="field-label">管理者パスワード</div>
+        <input type="password" id="pwInput" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doAdminLogin()">
+      </div>
+      <button class="btn btn-primary" onclick="doAdminLogin()">ログイン</button>
+    </div>
+  </div>
+</div>
+
+<!-- メイン画面 -->
+<div id="screen-main" class="screen">
+  <div class="header">
+    <div>
+      <div class="header-title">新人レポート — 管理者</div>
+      <div class="header-sub" id="headerDate"></div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">ログアウト</button>
+  </div>
+
+  <div class="main-layout">
+    <!-- サイドバー：スタッフ一覧 -->
+    <div class="sidebar">
+      <div class="sidebar-label">新人スタッフ</div>
+      <div id="staffList">
+        <div style="font-size:12px;color:var(--text3);padding:8px;">読み込み中...</div>
+      </div>
+    </div>
+
+    <!-- コンテンツ -->
+    <div class="content">
+      <div id="content-empty" class="empty-state">
+        左のスタッフを選択してください
+      </div>
+      <div id="content-staff" style="display:none;">
+        <div class="content-header">
+          <div>
+            <div class="content-title" id="selectedStaffName"></div>
+            <div class="content-sub" id="selectedStaffSub"></div>
+          </div>
+        </div>
+
+        <div class="tab-row">
+          <button class="tab active" onclick="switchContentTab('reports', this)">投稿一覧</button>
+          <button class="tab" onclick="switchContentTab('compare', this)">成長比較</button>
+        </div>
+
+        <div id="tab-reports">
+          <div class="filter-row" id="filterRow"></div>
+          <div id="reportList"></div>
+        </div>
+
+        <div id="tab-compare" style="display:none;">
+          <div class="compare-section">
+            <div class="compare-title">比較する投稿を選択</div>
+            <div class="compare-sub">2件以上チェックすると写真・タイムを並べて比較できます</div>
+            <div class="compare-select-area" id="compareCheckboxes"></div>
+            <div class="compare-grid" id="compareGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 画像ライトボックス -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<!-- ローディング -->
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyfYE1tJbTujlTCbw0p8JvAvU5z-w-phjis7cWGz3LSa5ltLTKYxmXPDZptb172vHTTUw/exec'; // GASデプロイ後に差し替え
+const ADMIN_PW = '0723';
+
+let currentStaff = '';
+let allReports = [];
+let staffList = [];
+
+// ===== ログイン =====
+function doAdminLogin() {
+  const pw = document.getElementById('pwInput').value;
+  if (pw !== ADMIN_PW) { alert('パスワードが違います'); return; }
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-main').classList.add('active');
+  document.getElementById('headerDate').textContent = new Date().toLocaleDateString('ja-JP', {year:'numeric',month:'long',day:'numeric'});
+  loadStaffList();
+}
+
+function doLogout() {
+  document.getElementById('screen-main').classList.remove('active');
+  document.getElementById('screen-login').classList.add('active');
+  document.getElementById('pwInput').value = '';
+}
+
+// ===== スタッフ一覧 =====
+async function loadStaffList() {
+  try {
+    const res = await fetch(`${GAS_URL}?action=getStaff`);
+    const data = await res.json();
+    staffList = data.staff || [];
+    renderStaffList();
+  } catch(e) {
+    document.getElementById('staffList').innerHTML =
+      '<div style="font-size:12px;color:#999;padding:8px;">GAS設定後に表示されます</div>';
+  }
+}
+
+function renderStaffList() {
+  const el = document.getElementById('staffList');
+  // スタッフ名のスペースをIDに使えないのでエスケープ
+  el.innerHTML = staffList.map(name => {
+    const safeId = 'staff-' + name.replace(/\s+/g, '_');
+    return `<div class="staff-item" id="${safeId}" onclick="selectStaff('${name}')">
+      <span>${name}</span>
+    </div>`;
+  }).join('');
+}
+
+async function selectStaff(name) {
+  currentStaff = name;
+  document.querySelectorAll('.staff-item').forEach(el => el.classList.remove('active'));
+  const safeId = 'staff-' + name.replace(/\s+/g, '_');
+  const el = document.getElementById(safeId);
+  if (el) el.classList.add('active');
+  document.getElementById('content-empty').style.display = 'none';
+  document.getElementById('content-staff').style.display = 'block';
+  document.getElementById('selectedStaffName').textContent = name;
+  await loadReports(name);
+}
+
+// ===== レポート読み込み =====
+async function loadReports(staff) {
+  document.getElementById('overlay').classList.add('active');
+  document.getElementById('reportList').innerHTML = '';
+  try {
+    const res = await fetch(`${GAS_URL}?action=getHistory&staff=${encodeURIComponent(staff)}`);
+    const data = await res.json();
+    allReports = data.rows ? data.rows.reverse() : [];
+    document.getElementById('selectedStaffSub').textContent = `${allReports.length}件の投稿`;
+    renderReports(allReports);
+    renderCompareCheckboxes();
+    buildFilterChips();
+  } catch(e) {
+    document.getElementById('reportList').innerHTML =
+      '<div class="empty-state">GAS設定後に表示されます</div>';
+  }
+  document.getElementById('overlay').classList.remove('active');
+}
+
+function buildFilterChips() {
+  const months = [...new Set(allReports.map(r => r.datetime.slice(0,7)))];
+  const row = document.getElementById('filterRow');
+  row.innerHTML = `<button class="filter-chip active" onclick="filterByMonth('all', this)">すべて</button>` +
+    months.map(m => `<button class="filter-chip" onclick="filterByMonth('${m}', this)">${m}</button>`).join('');
+}
+
+function filterByMonth(month, el) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const filtered = month === 'all' ? allReports : allReports.filter(r => r.datetime.startsWith(month));
+  renderReports(filtered);
+}
+
+// ===== レポート描画 =====
+function renderReports(rows) {
+  const el = document.getElementById('reportList');
+  if (rows.length === 0) {
+    el.innerHTML = '<div class="empty-state">投稿がありません</div>';
+    return;
+  }
+  el.innerHTML = rows.map((row, idx) => buildReportCard(row, idx)).join('');
+}
+
+function buildReportCard(row, idx) {
+  const photos = row.photos ? row.photos.split(',').filter(Boolean) : [];
+  const times = [
+    row.timeCut > 0 ? `カット ${row.timeCut}分` : '',
+    row.timeSet > 0 ? `セット ${row.timeSet}分` : '',
+    row.timeColorApply > 0 ? `カラー塗付 ${row.timeColorApply}分` : '',
+    row.timeColorWait > 0 ? `放置 ${row.timeColorWait}分` : '',
+    row.timePerm > 0 ? `パーマ ${row.timePerm}分` : '',
+  ].filter(Boolean);
+
+  const hasFb = !!row.fbComment;
+  const fbHtml = hasFb
+    ? `<div class="fb-existing">
+        <div class="fb-existing-label">管理者FB（${row.fbDate}）</div>
+        <div class="fb-existing-text">${row.fbComment}</div>
+       </div>`
+    : '';
+
+  return `
+    <div class="report-card ${hasFb ? 'has-fb' : ''}" id="card-${idx}">
+      <div class="card-header">
+        <div class="card-date">${row.datetime}</div>
+        <div class="card-no">写真${photos.length}枚</div>
+      </div>
+      ${photos.length > 0 ? `
+        <div class="photos-row">
+          ${photos.map(url => `<img src="${url}" class="report-photo" onclick="openLightbox('${url}')">`).join('')}
+        </div>` : ''}
+      <div class="time-tags">
+        ${times.map(t => `<span class="time-tag">${t}</span>`).join('')}
+      </div>
+      <div class="section-row">
+        <div class="section-key">良かった点</div>
+        <div class="section-val">${row.good}</div>
+      </div>
+      <div class="section-row">
+        <div class="section-key">反省点・改善点</div>
+        <div class="section-val">${row.reflect}</div>
+      </div>
+      <div class="fb-area">
+        ${fbHtml}
+        <div class="fb-input-wrap">
+          <textarea id="fb-${idx}" placeholder="フィードバックを入力してください...">${row.fbComment || ''}</textarea>
+          <button class="btn-sm btn-green" onclick="saveFeedback(${idx}, '${row.rowIndex}')">保存</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ===== FB保存 =====
+async function saveFeedback(idx, rowIndex) {
+  const text = document.getElementById(`fb-${idx}`).value.trim();
+  if (!text) { alert('フィードバックを入力してください'); return; }
+  document.getElementById('overlay').classList.add('active');
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'saveFeedback',
+        staff: currentStaff,
+        rowIndex: rowIndex,
+        fbComment: text,
+        fbDate: new Date().toLocaleDateString('ja-JP')
+      })
+    });
+    alert('フィードバックを保存しました');
+    await loadReports(currentStaff);
+  } catch(e) {
+    alert('保存に失敗しました');
+  }
+  document.getElementById('overlay').classList.remove('active');
+}
+
+// ===== タブ切替 =====
+function switchContentTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-reports').style.display = tab === 'reports' ? 'block' : 'none';
+  document.getElementById('tab-compare').style.display = tab === 'compare' ? 'block' : 'none';
+}
+
+// ===== 成長比較 =====
+function renderCompareCheckboxes() {
+  const el = document.getElementById('compareCheckboxes');
+  el.innerHTML = allReports.map((row, idx) => `
+    <label class="date-checkbox">
+      <input type="checkbox" value="${idx}" onchange="renderCompareGrid()">
+      <span>${row.datetime.slice(0,16)}</span>
+    </label>
+  `).join('');
+}
+
+function renderCompareGrid() {
+  const checked = [...document.querySelectorAll('#compareCheckboxes input:checked')].map(c => parseInt(c.value));
+  const el = document.getElementById('compareGrid');
+  if (checked.length < 2) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--text3);">2件以上選択してください</div>';
+    return;
+  }
+  el.innerHTML = checked.map(idx => {
+    const row = allReports[idx];
+    const photos = row.photos ? row.photos.split(',').filter(Boolean) : [];
+    const firstPhoto = photos[0] || '';
+    return `
+      <div class="compare-col">
+        <div class="compare-col-header">
+          <div class="compare-col-date">${row.datetime.slice(0,16)}</div>
+        </div>
+        <div class="compare-col-body">
+          ${firstPhoto ? `<img src="${firstPhoto}" class="compare-img" onclick="openLightbox('${firstPhoto}')">` : '<div style="width:100%;aspect-ratio:1;background:var(--surface2);border-radius:4px;margin-bottom:8px;"></div>'}
+          <div class="compare-stat">カット：<span class="stat-value">${row.timeCut || '-'}分</span></div>
+          <div class="compare-stat">セット：<span class="stat-value">${row.timeSet || '-'}分</span></div>
+          <div class="compare-stat" style="margin-top:6px;font-size:11px;color:var(--text2);line-height:1.5;">${row.good}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ===== ライトボックス =====
+function openLightbox(url) {
+  document.getElementById('lightboxImg').src = url;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+</script>
+</body>
+</html>
