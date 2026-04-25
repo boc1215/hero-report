@@ -1,1 +1,15 @@
-
+{
+  "name": "新人レポート",
+  "short_name": "新人レポート",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "icon-newcomer.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
