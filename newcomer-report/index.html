@@ -4,23 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>新人レポート</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #222222;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.15);
-    --text: #f0f0f0;
-    --text2: #999;
-    --text3: #666;
-    --accent: #c8f542;
-    --accent-dim: rgba(200,245,66,0.12);
-    --danger: #ff5f5f;
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface2: #f5f5f5;
+    --border: rgba(0,0,0,0.10);
+    --border2: rgba(0,0,0,0.20);
+    --text: #1a1a1a;
+    --text2: #555;
+    --text3: #999;
+    --accent: #1a1a1a;
+    --accent-light: #f0f0f0;
+    --danger: #d32f2f;
     --radius: 12px;
     --radius-sm: 8px;
   }
@@ -33,30 +33,44 @@
     padding-bottom: 40px;
   }
   .header {
-    padding: 20px 20px 16px;
+    padding: 0 16px;
+    height: 52px;
     border-bottom: 1px solid var(--border);
     position: sticky; top: 0; z-index: 100;
     background: var(--bg);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
   }
-  .header-top { display: flex; justify-content: space-between; align-items: center; }
-  .app-title { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; }
-  .staff-info { font-size: 12px; color: var(--text2); }
-  .progress-bar-wrap { margin-top: 12px; height: 2px; background: var(--border); border-radius: 2px; }
-  .progress-bar { height: 2px; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+  .header-left { display: flex; align-items: center; }
+  .header-center { text-align: center; }
+  .header-right { display: flex; justify-content: flex-end; }
+  .app-title { font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: 0.04em; }
+  .staff-info { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .back-btn {
+    font-size: 12px; color: var(--text2); cursor: pointer;
+    padding: 6px 10px; border: 1px solid var(--border2);
+    border-radius: 20px; background: none; font-family: inherit;
+    white-space: nowrap;
+  }
+  .back-btn:hover { background: var(--surface2); }
+  .progress-bar-wrap { height: 2px; background: var(--border); position: absolute; bottom: 0; left: 0; right: 0; }
+  .progress-bar { height: 2px; background: var(--accent); width: 0%; transition: width 0.4s ease; }
 
-  .screen { display: none; padding: 20px; }
+  .screen { display: none; }
   .screen.active { display: block; }
 
   /* ログイン */
   .login-wrap {
     min-height: 100vh; display: flex; flex-direction: column;
     align-items: center; justify-content: center; padding: 40px 24px;
+    background: var(--bg);
   }
   .login-logo {
-    font-size: 36px; font-weight: 700; color: var(--accent);
-    letter-spacing: -0.02em; margin-bottom: 6px;
+    font-size: 22px; font-weight: 700; color: var(--text);
+    letter-spacing: 0.06em; margin-bottom: 4px;
   }
-  .login-sub { font-size: 12px; color: var(--text3); margin-bottom: 48px; letter-spacing: 0.08em; }
+  .login-sub { font-size: 12px; color: var(--text3); margin-bottom: 40px; letter-spacing: 0.08em; }
   .login-card {
     width: 100%; max-width: 340px;
     background: var(--surface); border: 1px solid var(--border);
@@ -70,37 +84,33 @@
     transition: border-color 0.2s;
   }
   select:focus, input:focus, textarea:focus { border-color: var(--accent); }
-  select option { background: #222; }
   textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
 
   .btn {
     width: 100%; padding: 12px; border: none; border-radius: var(--radius-sm);
     font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
-    transition: all 0.2s; letter-spacing: 0.05em;
+    transition: all 0.2s; letter-spacing: 0.03em;
   }
-  .btn-primary { background: var(--accent); color: #0f0f0f; }
-  .btn-primary:hover { background: #d4f855; transform: translateY(-1px); }
-  .btn-primary:active { transform: translateY(0); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-ghost {
     background: transparent; color: var(--text2);
     border: 1px solid var(--border2); margin-top: 10px;
   }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-ghost:hover { background: var(--surface2); }
 
   /* フォームセクション */
+  .form-wrap { padding: 20px; }
   .section { margin-bottom: 20px; }
   .section-title {
     font-size: 11px; font-weight: 700; color: var(--text3);
     letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px;
   }
   .card {
-    background: var(--surface); border: 1px solid var(--border);
+    background: var(--surface2); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 16px;
   }
-  .field { margin-bottom: 14px; }
-  .field:last-child { margin-bottom: 0; }
-  .field-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
 
   /* 写真アップロード */
   .photo-upload-zone {
@@ -108,25 +118,18 @@
     padding: 24px; text-align: center; cursor: pointer;
     transition: all 0.2s; background: var(--surface2);
   }
-  .photo-upload-zone:hover { border-color: var(--accent); background: var(--accent-dim); }
-  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .photo-upload-zone:hover { border-color: var(--accent); background: #f0f0f0; }
+  .upload-icon { font-size: 26px; margin-bottom: 8px; }
   .upload-text { font-size: 13px; color: var(--text2); }
   .upload-hint { font-size: 11px; color: var(--text3); margin-top: 4px; }
-  .photo-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px;
-  }
+  .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
   .photo-item { position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden; }
   .photo-item img { width: 100%; height: 100%; object-fit: cover; }
   .photo-remove {
     position: absolute; top: 4px; right: 4px;
     width: 20px; height: 20px; border-radius: 50%;
-    background: rgba(0,0,0,0.7); color: #fff; border: none;
+    background: rgba(0,0,0,0.55); color: #fff; border: none;
     font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  }
-  .photo-uploading {
-    position: absolute; inset: 0; background: rgba(0,0,0,0.6);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; color: var(--accent);
   }
   #photoInput { display: none; }
 
@@ -138,13 +141,15 @@
   .time-input-wrap input { flex: 1; }
   .time-unit { font-size: 12px; color: var(--text3); white-space: nowrap; }
 
-  /* ステップナビ */
-  .step-nav { display: flex; gap: 10px; margin-top: 24px; }
-  .step-nav .btn { flex: 1; }
+  .count-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 20px;
+    background: var(--surface2); color: var(--text3); font-size: 11px; font-weight: 700;
+    margin-left: 6px; border: 1px solid var(--border);
+  }
 
   /* 送信中オーバーレイ */
   .overlay {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.85);
     z-index: 999; flex-direction: column; align-items: center; justify-content: center;
   }
   .overlay.active { display: flex; }
@@ -163,30 +168,23 @@
   }
   .complete-icon {
     width: 64px; height: 64px; border-radius: 50%;
-    background: var(--accent-dim); border: 2px solid var(--accent);
+    background: #f0f0f0; border: 2px solid var(--accent);
     display: flex; align-items: center; justify-content: center;
     font-size: 28px; margin-bottom: 20px;
     animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .complete-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-  .complete-sub { font-size: 13px; color: var(--text2); line-height: 1.7; }
+  .complete-sub { font-size: 13px; color: var(--text2); line-height: 1.7; white-space: pre-line; }
 
-  /* FB確認 */
+  /* 履歴 */
   .fb-card {
     background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 14px; margin-top: 12px;
+    border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 10px;
   }
-  .fb-date { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
-  .fb-text { font-size: 13px; color: var(--accent); line-height: 1.6; }
+  .fb-date { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+  .fb-text { font-size: 13px; color: #1a5c3a; line-height: 1.6; }
   .no-fb { font-size: 13px; color: var(--text3); font-style: italic; }
-
-  .count-badge {
-    display: inline-block; padding: 2px 8px; border-radius: 20px;
-    background: var(--accent-dim); color: var(--accent); font-size: 11px; font-weight: 700;
-    margin-left: 6px;
-  }
-  .error-msg { font-size: 12px; color: var(--danger); margin-top: 6px; display: none; }
 </style>
 </head>
 <body>
@@ -194,46 +192,46 @@
 <!-- ログイン画面 -->
 <div id="screen-login" class="screen active">
   <div class="login-wrap">
-    <div class="login-logo">HERO</div>
+    <div class="login-logo">新人レポート</div>
     <div class="login-sub">NEWCOMER REPORT</div>
     <div class="login-card">
-      <div class="field">
+      <div style="margin-bottom: 16px;">
         <div class="login-label">名前を選択</div>
         <select id="staffSelect">
           <option value="">読み込み中...</option>
         </select>
       </div>
-      <div style="margin-top: 20px;">
-        <button class="btn btn-primary" onclick="doLogin()">ログイン</button>
-      </div>
+      <button class="btn btn-primary" onclick="doLogin()">はじめる</button>
     </div>
   </div>
 </div>
 
 <!-- メイン投稿画面 -->
 <div id="screen-main" class="screen">
-  <div class="header">
-    <div class="header-top">
-      <div class="app-title">NEWCOMER REPORT</div>
-      <div class="staff-info" id="headerStaff"></div>
+  <div class="header" style="position:relative;">
+    <div class="header-left">
+      <button class="back-btn" onclick="backToLogin()">← 名前選択</button>
     </div>
+    <div class="header-center">
+      <div class="app-title">新人レポート <span id="headerStaff"></span></div>
+    </div>
+    <div class="header-right"></div>
     <div class="progress-bar-wrap">
       <div class="progress-bar" id="progressBar"></div>
     </div>
   </div>
 
-  <div style="padding: 20px;">
+  <div class="form-wrap">
     <!-- 写真 -->
     <div class="section">
-      <div class="section-title">写真 <span id="photoCountBadge" class="count-badge">0/6</span></div>
+      <div class="section-title">写真 <span id="photoCountBadge" class="count-badge">0/6</span><span style="font-size:10px;color:var(--text3);margin-left:6px;">目安4〜6枚</span></div>
       <div class="photo-upload-zone" onclick="document.getElementById('photoInput').click()">
         <div class="upload-icon">📷</div>
         <div class="upload-text">タップして写真を追加</div>
-        <div class="upload-hint">4〜6枚 / JPEG・PNG</div>
+        <div class="upload-hint">目安4〜6枚 / JPEG・PNG（任意）</div>
       </div>
       <input type="file" id="photoInput" accept="image/*" multiple onchange="handlePhotos(this)">
       <div class="photo-grid" id="photoGrid"></div>
-      <div class="error-msg" id="photoError">写真は4〜6枚選択してください</div>
     </div>
 
     <!-- タイム -->
@@ -300,7 +298,6 @@
     </div>
 
     <button class="btn btn-primary" id="submitBtn" onclick="submitReport()">投稿する</button>
-
     <button class="btn btn-ghost" onclick="goToHistory()">過去の投稿を見る</button>
   </div>
 </div>
@@ -308,21 +305,33 @@
 <!-- 履歴画面 -->
 <div id="screen-history" class="screen">
   <div class="header">
-    <div class="header-top">
-      <div class="app-title">投稿履歴</div>
-      <div class="staff-info" id="headerStaff2"></div>
+    <div class="header-left">
+      <button class="back-btn" onclick="showMain()">← 投稿画面</button>
     </div>
+    <div class="header-center">
+      <div class="app-title">投稿履歴 <span id="headerStaff2"></span></div>
+    </div>
+    <div class="header-right"></div>
   </div>
   <div style="padding: 20px;">
     <div id="historyList">
       <div style="text-align:center; color: var(--text3); padding: 40px; font-size: 13px;">読み込み中...</div>
     </div>
-    <button class="btn btn-ghost" style="margin-top:16px;" onclick="showMain()">投稿画面に戻る</button>
+    <button class="btn btn-ghost" style="margin-top:16px;" onclick="backToLogin()">名前の選択に戻る</button>
   </div>
 </div>
 
 <!-- 完了画面 -->
 <div id="screen-complete" class="screen">
+  <div class="header">
+    <div class="header-left">
+      <button class="back-btn" onclick="backToLogin()">← 名前選択</button>
+    </div>
+    <div class="header-center">
+      <div class="app-title">新人レポート</div>
+    </div>
+    <div class="header-right"></div>
+  </div>
   <div class="complete-wrap">
     <div class="complete-icon">✓</div>
     <div class="complete-title">投稿完了！</div>
@@ -330,6 +339,7 @@
     <div style="margin-top: 32px; width: 100%; max-width: 300px;">
       <button class="btn btn-primary" onclick="nextPost()">続けて投稿する</button>
       <button class="btn btn-ghost" onclick="goToHistory()">履歴を確認する</button>
+      <button class="btn btn-ghost" onclick="backToLogin()">名前の選択に戻る</button>
     </div>
   </div>
 </div>
@@ -341,23 +351,15 @@
 </div>
 
 <script>
-// ===== 設定 =====
 const CLOUDINARY_CLOUD = 'dr2vksykp';
 const CLOUDINARY_PRESET = 'newcomer-report-upload';
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbyfYE1tJbTujlTCbw0p8JvAvU5z-w-phjis7cWGz3LSa5ltLTKYxmXPDZptb172vHTTUw/exec'; // GASデプロイ後に差し替え
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyfYE1tJbTujlTCbw0p8JvAvU5z-w-phjis7cWGz3LSa5ltLTKYxmXPDZptb172vHTTUw/exec';
 
-// ===== 状態 =====
 let currentStaff = '';
 let photoFiles = [];
 let photoUrls = [];
 
-// ===== 初期化 =====
 window.onload = async () => {
-  const saved = localStorage.getItem('newcomer_staff');
-  if (saved) {
-    currentStaff = saved;
-    showMain();
-  }
   await loadStaffList();
 };
 
@@ -371,13 +373,10 @@ async function loadStaffList() {
       const opt = document.createElement('option');
       opt.value = name;
       opt.textContent = name;
-      if (name === currentStaff) opt.selected = true;
       sel.appendChild(opt);
     });
   } catch(e) {
-    // GAS未設定時のフォールバック
-    const sel = document.getElementById('staffSelect');
-    sel.innerHTML = '<option value="">GAS設定後に有効になります</option>';
+    document.getElementById('staffSelect').innerHTML = '<option value="">読み込みに失敗しました</option>';
   }
 }
 
@@ -385,11 +384,16 @@ function doLogin() {
   const sel = document.getElementById('staffSelect');
   if (!sel.value) return alert('名前を選択してください');
   currentStaff = sel.value;
-  localStorage.setItem('newcomer_staff', currentStaff);
   showMain();
 }
 
-// ===== 画面切替 =====
+function backToLogin() {
+  currentStaff = '';
+  resetForm();
+  showScreen('login');
+  loadStaffList();
+}
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
@@ -408,27 +412,22 @@ function goToHistory() {
   loadHistory();
 }
 
-// ===== 進捗バー =====
 function updateProgress() {
   let filled = 0;
-  if (photoUrls.length >= 4) filled++;
+  if (photoFiles.length > 0) filled++;
   if (document.getElementById('good').value.trim()) filled++;
   if (document.getElementById('reflect').value.trim()) filled++;
-  const pct = Math.round((filled / 3) * 100);
-  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressBar').style.width = Math.round((filled / 3) * 100) + '%';
 }
 
 document.addEventListener('input', updateProgress);
 
-// ===== 写真処理 =====
 function handlePhotos(input) {
   const newFiles = Array.from(input.files);
   const remaining = 6 - photoFiles.length;
-  const toAdd = newFiles.slice(0, remaining);
-  photoFiles = [...photoFiles, ...toAdd];
+  photoFiles = [...photoFiles, ...newFiles.slice(0, remaining)];
   renderPhotoGrid();
   input.value = '';
-  document.getElementById('photoError').style.display = 'none';
   updateProgress();
 }
 
@@ -439,10 +438,7 @@ function renderPhotoGrid() {
     const url = URL.createObjectURL(file);
     const item = document.createElement('div');
     item.className = 'photo-item';
-    item.innerHTML = `
-      <img src="${url}" alt="photo${i+1}">
-      <button class="photo-remove" onclick="removePhoto(${i})">×</button>
-    `;
+    item.innerHTML = `<img src="${url}" alt="photo${i+1}"><button class="photo-remove" onclick="removePhoto(${i})">×</button>`;
     grid.appendChild(item);
   });
   document.getElementById('photoCountBadge').textContent = `${photoFiles.length}/6`;
@@ -454,7 +450,6 @@ function removePhoto(idx) {
   updateProgress();
 }
 
-// ===== Cloudinaryアップロード =====
 async function uploadToCloudinary(file) {
   const fd = new FormData();
   fd.append('file', file);
@@ -467,12 +462,7 @@ async function uploadToCloudinary(file) {
   return data.secure_url;
 }
 
-// ===== 投稿送信 =====
 async function submitReport() {
-  if (photoFiles.length < 4) {
-    document.getElementById('photoError').style.display = 'block';
-    return;
-  }
   if (!document.getElementById('good').value.trim()) {
     alert('良かった点を入力してください');
     return;
@@ -487,7 +477,6 @@ async function submitReport() {
   overlay.classList.add('active');
 
   try {
-    // 写真アップロード
     photoUrls = [];
     for (let i = 0; i < photoFiles.length; i++) {
       overlayText.textContent = `写真をアップロード中... (${i+1}/${photoFiles.length})`;
@@ -515,25 +504,17 @@ async function submitReport() {
       fbDate: ''
     };
 
-    await fetch(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
+    await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
 
     overlay.classList.remove('active');
-
-    // 完了表示
-    const hour = now.getHours();
     document.getElementById('completeMsg').textContent =
-      `${currentStaff}さん、お疲れさまです！\n写真${photoUrls.length}枚・記録を保存しました。`;
+      `${currentStaff}さん、お疲れさまです！\n記録を保存しました。`;
     showScreen('complete');
-
-    // フォームリセット
     resetForm();
 
   } catch(e) {
     overlay.classList.remove('active');
-    alert('送信中にエラーが発生しました。通信状況を確認してください。\n' + e.message);
+    alert('送信中にエラーが発生しました。\n' + e.message);
   }
 }
 
@@ -550,24 +531,21 @@ function resetForm() {
   updateProgress();
 }
 
-function nextPost() {
-  showMain();
-}
+function nextPost() { showMain(); }
 
-// ===== 履歴読み込み =====
 async function loadHistory() {
   const list = document.getElementById('historyList');
-  list.innerHTML = '<div style="text-align:center; color: var(--text3); padding: 40px; font-size: 13px;">読み込み中...</div>';
+  list.innerHTML = '<div style="text-align:center;color:var(--text3);padding:40px;font-size:13px;">読み込み中...</div>';
   try {
     const res = await fetch(`${GAS_URL}?action=getHistory&staff=${encodeURIComponent(currentStaff)}`);
     const data = await res.json();
     if (!data.rows || data.rows.length === 0) {
-      list.innerHTML = '<div style="text-align:center; color: var(--text3); padding: 40px; font-size: 13px;">まだ投稿がありません</div>';
+      list.innerHTML = '<div style="text-align:center;color:var(--text3);padding:40px;font-size:13px;">まだ投稿がありません</div>';
       return;
     }
     list.innerHTML = data.rows.reverse().map(row => buildHistoryCard(row)).join('');
   } catch(e) {
-    list.innerHTML = '<div style="text-align:center; color: var(--text3); padding: 40px; font-size: 13px;">GAS設定後に表示されます</div>';
+    list.innerHTML = '<div style="text-align:center;color:var(--text3);padding:40px;font-size:13px;">読み込みに失敗しました</div>';
   }
 }
 
@@ -596,8 +574,8 @@ function buildHistoryCard(row) {
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
         ${times.map(t => `<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--text2);">${t}</span>`).join('')}
       </div>
-      <div style="font-size:13px;line-height:1.6;margin-bottom:6px;"><span style="color:var(--accent);font-size:11px;">◎ </span>${row.good}</div>
-      <div style="font-size:13px;line-height:1.6;margin-bottom:10px;"><span style="color:var(--text3);font-size:11px;">△ </span>${row.reflect}</div>
+      <div style="font-size:13px;line-height:1.6;margin-bottom:6px;"><span style="font-size:11px;color:var(--text3);">◎ </span>${row.good}</div>
+      <div style="font-size:13px;line-height:1.6;margin-bottom:10px;"><span style="font-size:11px;color:var(--text3);">△ </span>${row.reflect}</div>
       ${fbHtml}
     </div>`;
 }
