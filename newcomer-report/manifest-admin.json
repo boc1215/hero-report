@@ -1,0 +1,15 @@
+{
+  "name": "新人FB",
+  "short_name": "新人FB",
+  "start_url": "./admin.html",
+  "display": "standalone",
+  "background_color": "#c8d8c4",
+  "theme_color": "#c8d8c4",
+  "icons": [
+    {
+      "src": "icon-admin.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
