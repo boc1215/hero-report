@@ -450,6 +450,8 @@ async function saveFeedback(idx, rowIndex) {
         fbDate: new Date().toLocaleDateString('ja-JP')
       })
     });
+    const textarea = document.getElementById(`fb-${idx}`);
+    if (textarea) textarea.value = '';
     alert('フィードバックを保存しました');
     await loadReports(currentStaff);
   } catch(e) {
