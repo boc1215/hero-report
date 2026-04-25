@@ -301,6 +301,22 @@ function formatDatetime(str) {
   const mm = String(d.getMinutes()).padStart(2, '0');
   return `${y}/${m}/${day}（${w}）${hh}:${mm}`;
 }
+
+// フィルター用：年/月のみ返す（例: 2026/4）
+function formatMonth(str) {
+  if (!str) return '';
+  const d = new Date(str);
+  if (isNaN(d.getTime())) return str;
+  return `${d.getFullYear()}/${d.getMonth() + 1}`;
+}
+
+// FBの日付表示用（例: 2026/4/25）
+function formatFbDate(str) {
+  if (!str) return str;
+  const d = new Date(str);
+  if (isNaN(d.getTime())) return str;
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+}
 let allReports = [];
 let staffList = [];
 
@@ -376,7 +392,7 @@ async function loadReports(staff) {
 }
 
 function buildFilterChips() {
-  const months = [...new Set(allReports.map(r => r.datetime.slice(0,7)))];
+  const months = [...new Set(allReports.map(r => formatMonth(r.datetime)))];
   const row = document.getElementById('filterRow');
   row.innerHTML = `<button class="filter-chip active" onclick="filterByMonth('all', this)">すべて</button>` +
     months.map(m => `<button class="filter-chip" onclick="filterByMonth('${m}', this)">${m}</button>`).join('');
@@ -385,7 +401,7 @@ function buildFilterChips() {
 function filterByMonth(month, el) {
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  const filtered = month === 'all' ? allReports : allReports.filter(r => r.datetime.startsWith(month));
+  const filtered = month === 'all' ? allReports : allReports.filter(r => formatMonth(r.datetime) === month);
   renderReports(filtered);
 }
 
@@ -412,7 +428,7 @@ function buildReportCard(row, idx) {
   const hasFb = !!row.fbComment;
   const fbHtml = hasFb
     ? `<div class="fb-existing">
-        <div class="fb-existing-label">管理者FB（${row.fbDate}）</div>
+        <div class="fb-existing-label">管理者FB（${formatFbDate(row.fbDate)}）</div>
         <div class="fb-existing-text">${row.fbComment}</div>
        </div>`
     : '';
