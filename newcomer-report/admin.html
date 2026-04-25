@@ -287,6 +287,20 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbyfYE1tJbTujlTCbw0p8JvA
 const ADMIN_PW = '0723';
 
 let currentStaff = '';
+
+function formatDatetime(str) {
+  if (!str) return '';
+  const d = new Date(str);
+  if (isNaN(d.getTime())) return str;
+  const week = ['日','月','火','水','木','金','土'];
+  const y = d.getFullYear();
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  const w = week[d.getDay()];
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${y}/${m}/${day}（${w}）${hh}:${mm}`;
+}
 let allReports = [];
 let staffList = [];
 
@@ -406,7 +420,7 @@ function buildReportCard(row, idx) {
   return `
     <div class="report-card ${hasFb ? 'has-fb' : ''}" id="card-${idx}">
       <div class="card-header">
-        <div class="card-date">${row.datetime}</div>
+        <div class="card-date">${formatDatetime(row.datetime)}</div>
         <div class="card-no">写真${photos.length}枚</div>
       </div>
       ${photos.length > 0 ? `
@@ -474,7 +488,7 @@ function renderCompareCheckboxes() {
   el.innerHTML = allReports.map((row, idx) => `
     <label class="date-checkbox">
       <input type="checkbox" value="${idx}" onchange="renderCompareGrid()">
-      <span>${row.datetime.slice(0,16)}</span>
+      <span>${formatDatetime(row.datetime)}</span>
     </label>
   `).join('');
 }
@@ -493,7 +507,7 @@ function renderCompareGrid() {
     return `
       <div class="compare-col">
         <div class="compare-col-header">
-          <div class="compare-col-date">${row.datetime.slice(0,16)}</div>
+          <div class="compare-col-date">${formatDatetime(row.datetime)}</div>
         </div>
         <div class="compare-col-body">
           ${firstPhoto ? `<img src="${firstPhoto}" class="compare-img" onclick="openLightbox('${firstPhoto}')">` : '<div style="width:100%;aspect-ratio:1;background:var(--surface2);border-radius:4px;margin-bottom:8px;"></div>'}
