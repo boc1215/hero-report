@@ -461,7 +461,7 @@ function buildReportCard(row, idx) {
       <div class="fb-area">
         ${fbHtml}
         <div class="fb-input-wrap">
-          <textarea id="fb-${idx}" placeholder="フィードバックを入力してください...">${row.fbComment || ''}</textarea>
+          <textarea id="fb-${idx}" placeholder="フィードバックを入力してください<textarea id="fb-${idx}" placeholder="フィードバックを入力してください..."></textarea>...">${row.fbComment || ''}</textarea>
           <button class="btn-sm btn-green" onclick="saveFeedback(${idx}, '${row.rowIndex}')">保存</button>
         </div>
       </div>
@@ -484,8 +484,6 @@ async function saveFeedback(idx, rowIndex) {
         fbDate: new Date().toLocaleDateString('ja-JP')
       })
     });
-    const textarea = document.getElementById(`fb-${idx}`);
-    if (textarea) textarea.value = '';
     alert('フィードバックを保存しました');
     await loadReports(currentStaff);
   } catch(e) {
