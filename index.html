@@ -282,8 +282,9 @@ function fetchLatest() {
   fetch(GAS_URL + '?type=' + type)
     .then(r => r.json())
     .then(data => {
-      if (type === 'reports' && data.reports) { reports = data.reports; saveReports(reports); }
-      if (type === 'trainings' && data.trainings) { trainings = data.trainings; saveTrainings(trainings); }
+      // board-sync.gsのdoGetは配列を直接返す（data.reports/data.trainingsではない）
+      if (type === 'reports' && Array.isArray(data)) { reports = data; saveReports(reports); }
+      if (type === 'trainings' && Array.isArray(data)) { trainings = data; saveTrainings(trainings); }
       renderList();
       btn.textContent = '最新データを取得する';
       btn.disabled = false;
@@ -349,7 +350,6 @@ function submitTraining() {
 }
 
 function sendToSheet(data) {
-  // GASへはフォーム経由のno-corsが最も確実
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = GAS_URL;
@@ -495,9 +495,10 @@ function removeTrainee(i) {
 }
 </script>
 <script>
+// Service Worker登録解除（キャッシュ問題対策）
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js');
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    registrations.forEach(reg => reg.unregister());
   });
 }
 </script>
