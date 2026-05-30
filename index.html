@@ -219,7 +219,6 @@ document.getElementById('tr-date').value    = today();
 renderStoreSelect();
 renderTraineeSelect();
 
-// スプレッドシートからマスタを読み込む
 fetch(GAS_URL)
   .then(r => r.json())
   .then(data => {
@@ -276,19 +275,12 @@ function fetchLatest() {
   const btn = document.getElementById('fetch-btn');
   btn.textContent = '取得中...';
   btn.disabled = true;
-
   const type = currentListView === 'store' ? 'reports' : 'trainings';
   fetch(GAS_URL + '?type=' + type)
     .then(r => r.json())
     .then(data => {
-      if (type === 'reports' && data.reports) {
-        reports = data.reports;
-        saveReports(reports);
-      }
-      if (type === 'trainings' && data.trainings) {
-        trainings = data.trainings;
-        saveTrainings(trainings);
-      }
+      if (type === 'reports' && data.reports) { reports = data.reports; saveReports(reports); }
+      if (type === 'trainings' && data.trainings) { trainings = data.trainings; saveTrainings(trainings); }
       renderList();
       btn.textContent = '最新データを取得する';
       btn.disabled = false;
@@ -356,8 +348,8 @@ function submitTraining() {
 function sendToSheet(data) {
   fetch(GAS_URL, {
     method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    mode: 'cors',
+    headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify(data)
   }).catch(err => console.error('送信エラー:', err));
 }
@@ -494,7 +486,7 @@ function removeTrainee(i) {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/hero-report/sw.js');
+    navigator.serviceWorker.register('/sw.js');
   });
 }
 </script>
